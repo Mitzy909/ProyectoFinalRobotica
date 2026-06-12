@@ -1,71 +1,174 @@
-<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!--Descripción de los eslabones-->
+<?xml version="1.0"?>
+<robot name="robot_rrr_base_rotativa">
+
+  <!-- MATERIALES -->
+  <material name="azul_base">
+    <color rgba="0.05 0.15 0.8 1"/>
+  </material>
+
+  <material name="gris_columna">
+    <color rgba="0.75 0.75 0.75 1"/>
+  </material>
+
+  <material name="gris_oscuro">
+    <color rgba="0.15 0.15 0.15 1"/>
+  </material>
+
+  <material name="naranja">
+    <color rgba="1.0 0.45 0.0 1"/>
+  </material>
+
+  <material name="verde">
+    <color rgba="0.0 0.75 0.25 1"/>
+  </material>
+
+  <material name="amarillo">
+    <color rgba="1.0 0.9 0.0 1"/>
+  </material>
+
+  <!-- LINK FIJO DEL MUNDO -->
+  <link name="world"/>
+
+  <!-- BASE CIRCULAR INFERIOR -->
   <link name="base_link">
     <visual>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
       <geometry>
-        <box size="0.5 0.5 0.1"/>
+        <cylinder radius="0.28" length="0.10"/>
       </geometry>
-      <origin xyz="0 0 -0.05"/>
-      <material name="black">
-        <color rgba="0 0 0 0.5"/>
-      </material>
+      <material name="gris_oscuro"/>
     </visual>
   </link>
 
-  <link name="shoulder_link">
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- PARTE QUE ROTA SOBRE LA BASE -->
+  <link name="rotating_base_link">
     <visual>
+      <origin xyz="0 0 0.12" rpy="0 0 0"/>
       <geometry>
-        <box size="0.3 0.05 0.05"/>
+        <cylinder radius="0.24" length="0.08"/>
       </geometry>
-      <origin xyz="0.15 0 0"/>
-      <material name="cyan">
-        <color rgba="0 1 1 1"/>
-      </material>
-    </visual>
-  </link>
-  <link name="arm_link">
-    <visual>
-      <geometry>
-        <box size="0.3 0.05 0.05"/>
-      </geometry>
-      <origin xyz="0.15 0 0"/>
-      <material name="magenta">
-        <color rgba="1 0 1 1"/>
-      </material>
-    </visual>
-  </link>
-  <link name="forearm_link">
-    <visual>
-      <geometry>
-        <box size="0.3 0.05 0.05"/>
-      </geometry>
-      <origin xyz="0.15 0 0"/>
-      <material name="yellow">
-        <color rgba="1 1 0 1"/>
-      </material>
+      <material name="azul_base"/>
     </visual>
   </link>
 
-  <!--Descripción de las juntas-->
-  <joint name="shoulder_joint" type="revolute"> <!--tipo de junta: revolute, prismatic, fixed-->
+  <joint name="base_joint" type="revolute">
     <parent link="base_link"/>
-    <child link="shoulder_link"/>
+    <child link="rotating_base_link"/>
+    <origin xyz="0 0 0.08" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-3.14" upper ="3.14" effort="10.0" velocity="10.0"/>
-    <origin rpy="1.57 0 0" xyz="0 0 0"/> <!--roll, pitch, yaw-->
+    <limit lower="-3.1416" upper="3.1416" effort="20" velocity="2"/>
   </joint>
-  <joint name="arm_joint" type="revolute"> <!--tipo de junta: revolute, prismatic, fixed-->
-    <parent link="shoulder_link"/>
-    <child link="arm_link"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-3.14" upper ="3.14" effort="10.0" velocity="10.0"/>
-    <origin xyz="0.3 0 0" rpy="0 0 0"/>
+
+  <!-- COLUMNA VERTICAL -->
+  <link name="column_link">
+    <visual>
+      <origin xyz="0 0 0.25" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.055" length="0.50"/>
+      </geometry>
+      <material name="gris_columna"/>
+    </visual>
+  </link>
+
+  <joint name="column_joint" type="fixed">
+    <parent link="rotating_base_link"/>
+    <child link="column_link"/>
+    <origin xyz="0 0 0.15" rpy="0 0 0"/>
   </joint>
-  <joint name="forearm_joint" type="revolute"> <!--tipo de junta: revolute, prismatic, fixed-->
-    <parent link="arm_link"/>
-    <child link="forearm_link"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-3.14" upper ="3.14" effort="10.0" velocity="10.0"/>
-    <origin xyz="0.3 0 0"/>
+
+  <!-- DISCO DEL HOMBRO -->
+  <link name="shoulder_disk_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.075" length="0.08"/>
+      </geometry>
+      <material name="gris_oscuro"/>
+    </visual>
+  </link>
+
+  <joint name="shoulder_disk_joint" type="fixed">
+    <parent link="column_link"/>
+    <child link="shoulder_disk_link"/>
+    <origin xyz="0 0 0.52" rpy="0 0 0"/>
   </joint>
+
+  <!-- ESLABÓN 1 -->
+  <link name="link1">
+    <visual>
+      <origin xyz="0.30 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.60 0.06 0.06"/>
+      </geometry>
+      <material name="naranja"/>
+    </visual>
+  </link>
+
+<joint name="joint1" type="revolute">
+  <parent link="shoulder_disk_link"/>
+  <child link="link1"/>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <axis xyz="0 1 0"/>
+  <limit lower="-3.1416" upper="3.1416" effort="20" velocity="2"/>
+</joint>
+
+  <!-- DISCO DEL CODO -->
+  <link name="elbow_disk_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="0.065" length="0.08"/>
+      </geometry>
+      <material name="gris_oscuro"/>
+    </visual>
+  </link>
+
+  <joint name="elbow_disk_joint" type="fixed">
+    <parent link="link1"/>
+    <child link="elbow_disk_link"/>
+    <origin xyz="0.60 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ESLABÓN 2 -->
+  <link name="link2">
+    <visual>
+      <origin xyz="0.30 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.60 0.06 0.06"/>
+      </geometry>
+      <material name="verde"/>
+    </visual>
+  </link>
+
+<joint name="joint2" type="revolute">
+  <parent link="elbow_disk_link"/>
+  <child link="link2"/>
+  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <axis xyz="0 1 0"/>
+  <limit lower="-3.1416" upper="3.1416" effort="20" velocity="2"/>
+</joint>
+
+  <!-- EFECTOR FINAL -->
+  <link name="end_effector">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.055"/>
+      </geometry>
+      <material name="amarillo"/>
+    </visual>
+  </link>
+
+  <joint name="end_effector_joint" type="fixed">
+    <parent link="link2"/>
+    <child link="end_effector"/>
+    <origin xyz="0.60 0 0" rpy="0 0 0"/>
+  </joint>
+
 </robot>
